@@ -32,6 +32,8 @@ public class Gestor {
 
                 instruccion = st.nextToken();
 
+                System.out.println("INST - " + instruccion);
+
                 if (instruccion.contains("InsertaPersona")) {
 
                     String perfil, id, nombre, apellidos, fecha1, fecha2, categoria, departamento, horasAsignables;
@@ -40,21 +42,33 @@ public class Gestor {
                     String docenciaRecibida = "";
 
                     perfil = st.nextToken();
+                    System.out.println("PERF - " + perfil);
                     id = st.nextToken();
+                    System.out.println("DNI - " + id);
                     nombre = st.nextToken();
-                    apellidos = st.nextToken("\"");
+                    System.out.println("NM - " + nombre);
+                    apellidos = st.nextToken(" \"");
+                    System.out.println("APLL - " + apellidos);
                     fecha1 = st.nextToken();
+                    System.out.println("F1 - " + fecha1);
 
                     if (perfil.contains("profesor")) {
+                        System.out.println("¡ P !");
                         categoria = st.nextToken();
+                        System.out.println("CAT - " + categoria);
                         departamento = st.nextToken();
+                        System.out.println("DEP - " + departamento);
                         horasAsignables = st.nextToken();
+                        System.out.println("HASIG - " + horasAsignables);
 
                         Persona p = new Profesor(perfil, nombre, apellidos, id, fecha1, categoria, departamento, horasAsignables, docenciaImpartida);
 
                         InsertaPersona(p);
                     } else if (perfil.contains("alumno")) {
+                        System.out.println("¡ A !");
                         fecha2 = st.nextToken();
+                        System.out.println("F2 - " + fecha2);
+
                         Persona a = new Alumno(perfil, nombre, apellidos, id, fecha1, fecha2, asignaturasSuperadas, docenciaRecibida);
 
                         InsertaPersona(a);
