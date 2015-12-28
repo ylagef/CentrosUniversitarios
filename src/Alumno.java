@@ -45,4 +45,9 @@ public class Alumno extends Persona {
     public String toString() {
         return "Alumno " + super.toString() + ", Fecha de ingreso: " + fecha2 + ", Asignaturas superadas: " + asignaturasSuperadas + ", Docencia recibida: " + docenciaRecibida + ".";
     }
+
+
+    public String toStringOUT() {
+        return super.toStringOUT() + fecha2 + "\n" + asignaturasSuperadas + "\n" + docenciaRecibida;
+    }
 }

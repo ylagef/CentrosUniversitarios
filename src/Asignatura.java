@@ -81,4 +81,8 @@ public class Asignatura {
     public String toString() {
         return "Asignatura " + "Id: " + id + ", Nombre: " + nombre + ", Siglas: " + siglas + ", Curso: " + curso + "º, Coordinador: " + coordinador + ", Pre-requisitos: " + prerrequisitos + ", Grupos A: " + gruposA + ", Grupos B: " + gruposB + ".";
     }
+
+    public String toStringOUT() {
+        return id + "\n" + nombre + "\n" + siglas + "\n" + curso + "\n" + coordinador + "\n" + prerrequisitos + "\n" + gruposA + "\n" + gruposB;
+    }
 }

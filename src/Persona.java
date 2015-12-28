@@ -1,66 +1,78 @@
 public class Persona {
 
-	private String perfil; //ALUMNO O PROFESOR
-	private String nombre, apellidos;
-	private String dni; //SER� EL ID DE LA PERSONA
-	private String fecha1; //FECHA DE NACIMIENTO DE LA PERSONA.
-	
-	//CONSTRUCTOR CLASE PERSONA
-	public Persona(String perfil, String nombre, String apellidos, String dni, String fecha1) {
-		super();
-		this.perfil = perfil;
-		this.nombre = nombre;
-		this.apellidos = apellidos;
-		this.dni = dni;
-		this.fecha1 = fecha1;
-	}
+    private String perfil; //ALUMNO O PROFESOR
+    private String nombre, apellidos;
+    private String dni; //SER� EL ID DE LA PERSONA
+    private String fecha1; //FECHA DE NACIMIENTO DE LA PERSONA.
 
-	//GETTERS Y SETTERS
-	public String getPerfil() {
-		return perfil;
-	}
+    //CONSTRUCTOR CLASE PERSONA
+    public Persona(String perfil, String nombre, String apellidos, String dni, String fecha1) {
+        super();
+        this.perfil = perfil;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+        this.dni = dni;
+        this.fecha1 = fecha1;
+    }
 
-	public void setPerfil(String perfil) {
-		this.perfil = perfil;
-	}
+    //GETTERS Y SETTERS
+    public String getPerfil() {
+        return perfil;
+    }
 
-	public String getNombre() {
-		return nombre;
-	}
+    public void setPerfil(String perfil) {
+        this.perfil = perfil;
+    }
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+    public String getNombre() {
+        return nombre;
+    }
 
-	public String getApellidos() {
-		return apellidos;
-	}
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-	public void setApellidos(String apellidos) {
-		this.apellidos = apellidos;
-	}
+    public String getApellidos() {
+        return apellidos;
+    }
 
-	public String getDni() {
-		return dni;
-	}
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
 
-	public void setDni(String dni) {
-		this.dni = dni;
-	}
+    public String getDni() {
+        return dni;
+    }
 
-	public String getFecha1() {
-		return fecha1;
-	}
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
 
-	public void setFecha1(String fecha1) {
-		this.fecha1 = fecha1;
-	}
+    public String getFecha1() {
+        return fecha1;
+    }
 
-	//TOSTRING DE PERSONA
-	@Override
-	public String toString() {
-		return "Nombre: " + nombre + ", Apellidos: " + apellidos + ", Dni: " + dni
-				+ ", Fecha de nacimiento: " + fecha1;
-	}
-	
+    public void setFecha1(String fecha1) {
+        this.fecha1 = fecha1;
+    }
+
+    //TOSTRING DE PERSONA
+    @Override
+    public String toString() {
+        return "Nombre: " + nombre + ", Apellidos: " + apellidos + ", Dni: " + dni
+                + ", Fecha de nacimiento: " + fecha1;
+    }
+
+    public String toStringOUT() {
+        String tipo;
+        if (this instanceof Alumno) {
+            tipo = "alumno";
+        } else {
+            tipo = "profesor";
+        }
+
+        return tipo + "\n" + dni + "\n" + nombre + "\n" + apellidos + "\n" + fecha1 + "\n";
+    }
+
+
 }
