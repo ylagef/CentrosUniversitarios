@@ -45,65 +45,69 @@ public class Gestor {
                 instruccion = st.nextToken();
 
                 if (instruccion.contentEquals("InsertaPersona") || instruccion.contentEquals("AsignaCoordinador") || instruccion.contentEquals("AsignaCargaDocente") || instruccion.contentEquals("Matricula") || instruccion.contentEquals("AsignaGrupo") || instruccion.contentEquals("Evalua") || instruccion.contentEquals("Expediente") || instruccion.contentEquals("ObtenerCalendarioClases")) {
+                    try {
+                        switch (instruccion) {
+                            case "InsertaPersona":
+                                String perfil, id, nombre, apellidos, fecha1, fecha2, categoria, departamento, horasAsignables;
+                                String asignaturasSuperadas = "";
+                                String docenciaImpartida = "";
+                                String docenciaRecibida = "";
 
-                    switch (instruccion) {
+                                perfil = st.nextToken();
+                                id = st.nextToken();
+                                nombre = st.nextToken(" \"").concat(st.nextToken("\""));
+                                apellidos = st.nextToken(" \"").concat(st.nextToken("\""));
+                                st.nextToken(" ");
+                                fecha1 = st.nextToken();
 
-                        case "InsertaPersona":
-                            String perfil, id, nombre, apellidos, fecha1, fecha2, categoria, departamento, horasAsignables;
-                            String asignaturasSuperadas = "";
-                            String docenciaImpartida = "";
-                            String docenciaRecibida = "";
+                                if (perfil.contentEquals("profesor")) {
+                                    categoria = st.nextToken();
+                                    departamento = st.nextToken(" \"").concat(" ").concat(st.nextToken(" ").replace("\"", ""));
+                                    horasAsignables = st.nextToken().replace(" ", "");
 
-                            perfil = st.nextToken();
-                            id = st.nextToken();
-                            nombre = st.nextToken(" \"").concat(st.nextToken("\""));
-                            apellidos = st.nextToken(" \"").concat(st.nextToken("\""));
-                            st.nextToken(" ");
-                            fecha1 = st.nextToken();
+                                    Persona p = new Profesor(perfil, nombre, apellidos, id, fecha1, categoria, departamento, horasAsignables, docenciaImpartida);
 
-                            if (perfil.contentEquals("profesor")) {
-                                categoria = st.nextToken();
-                                departamento = st.nextToken(" \"").concat(" ").concat(st.nextToken(" ").replace("\"", ""));
-                                horasAsignables = st.nextToken().replace(" ", "");
+                                    InsertaPersona(p);
+                                } else if (perfil.contentEquals("alumno")) {
+                                    fecha2 = st.nextToken();
 
-                                Persona p = new Profesor(perfil, nombre, apellidos, id, fecha1, categoria, departamento, horasAsignables, docenciaImpartida);
+                                    Persona a = new Alumno(perfil, nombre, apellidos, id, fecha1, fecha2, asignaturasSuperadas, docenciaRecibida);
 
-                                InsertaPersona(p);
-                            } else if (perfil.contentEquals("alumno")) {
-                                fecha2 = st.nextToken();
+                                    InsertaPersona(a);
+                                }
+                                break;
 
-                                Persona a = new Alumno(perfil, nombre, apellidos, id, fecha1, fecha2, asignaturasSuperadas, docenciaRecibida);
+                            case "AsignaCoordinador": //AsignaCoordinador persona asignatura
+                                String persona = st.nextToken();
+                                String asignatura = st.nextToken();
+                                AsignaCoordinador(persona, asignatura);
+                                break;
 
-                                InsertaPersona(a);
-                            }
-                            break;
+                            case "AsignaCargaDocente": //AsignaCargaDocente persona asignatura tipoGrupo grupo
+                                String profesor = st.nextToken();
+                                String siglasAsig = st.nextToken();
+                                String tipoGrupo = st.nextToken();
+                                String idGrupo = st.nextToken();
+                                AsignaCargaDocente(profesor, siglasAsig, tipoGrupo, idGrupo);
+                                break;
+                            case "Matricula": //Matricula alumno asignatura
+                                String alumno = st.nextToken();
+                                String siglasAsignatura = st.nextToken();
+                                Matricula(alumno, siglasAsignatura);
+                                break;
+                            case "AsignaGrupo": //AsignaGrupo alumno asignatura tipoGrupo grupo
+                                break;
+                            case "Evalua": //Evalua asignatura cursoAcademico fichero
+                                break;
+                            case "Expediente": //Expediente alumno salida
+                                break;
+                            case "ObtenerCalendarioClases": //ObtenerCalendarioClases profesor salida
+                                break;
+                        }
 
-                        case "AsignaCoordinador": //AsignaCoordinador persona asignatura
-                            String persona = st.nextToken();
-                            String asignatura = st.nextToken();
-                            AsignaCoordinador(persona, asignatura);
-                            break;
-
-                        case "AsignaCargaDocente": //AsignaCargaDocente persona asignatura tipoGrupo grupo
-                            String profesor = st.nextToken();
-                            String siglasAsig = st.nextToken();
-                            String tipoGrupo = st.nextToken();
-                            String idGrupo = st.nextToken();
-                            AsignaCargaDocente(profesor, siglasAsig, tipoGrupo, idGrupo);
-                            break;
-                        case "Matricula": //Matricula alumno asignatura
-                            String alumno = st.nextToken();
-                            String siglasAsignatura = st.nextToken();
-                            Matricula(alumno, siglasAsignatura);
-                            break;
-                        case "AsignaGrupo": //AsignaGrupo alumno asignatura tipoGrupo grupo
-                            break;
-                        case "Evalua": //Evalua asignatura cursoAcademico fichero
-                            break;
-                        case "Expediente": //Expediente alumno salida
-                            break;
-                        case "ObtenerCalendarioClases": //ObtenerCalendarioClases profesor salida
-                            break;
+                    } catch (NoSuchElementException e) {
+                        s = "Numero de argumentos incorrecto\n";
+                        aw.write(s);
                     }
                 } else {
                     if (instruccion.contains("*")) {
@@ -117,7 +121,6 @@ public class Gestor {
             }
 
         }
-
         GestionaFicheros();
         aw.close();
 
@@ -244,6 +247,9 @@ public class Gestor {
 
         personas.put(p.getDni(), p);
 
+        s = "OK\n";
+        aw.write(s);
+
     }
 
     public void AsignaCoordinador(String persona, String asignatura) throws IOException {
@@ -251,18 +257,6 @@ public class Gestor {
         int idAsignatura = 0;
 
         Iterator<Integer> it = asignaturas.keySet().iterator();
-
-        while (it.hasNext()) {
-            Integer key = it.next();
-            if (asignaturas.get(key).getSiglas().contentEquals(asignatura)) {
-                idAsignatura = Integer.parseInt(asignaturas.get(key).getId());
-                break;
-            } else {
-                s = clave + "Asignatura inexistente\n";
-                aw.write(s);
-                return;
-            }
-        }
         if (!personas.containsKey(persona)) {
             s = clave + "Profesor inexistente\n";
             aw.write(s);
@@ -273,6 +267,18 @@ public class Gestor {
             aw.write(s);
             return;
         }
+        while (it.hasNext()) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getSiglas().contains(asignatura)) {
+                idAsignatura = Integer.parseInt(asignaturas.get(key).getId().replaceAll(" ", ""));
+                break;
+            }
+            if (!it.hasNext()) {
+                s = clave + "Asignatura inexistente\n";
+                aw.write(s);
+                return;
+            }
+        }
         if (NumeroAsignaturasCoordinador(persona) >= 2) {
             s = clave + "Profesor ya es coordinador de 2 materias\n";
             aw.write(s);
@@ -281,6 +287,8 @@ public class Gestor {
 
         asignaturas.get(idAsignatura).setCoordinador(persona);
 
+        s = clave + "OK\n";
+        aw.write(s);
     }
 
     public void AsignaCargaDocente(String persona, String asignatura, String tipoGrupo, String idGrupo) throws IOException {
@@ -289,6 +297,11 @@ public class Gestor {
 
         Iterator<Integer> it = asignaturas.keySet().iterator();
 
+        if (!personas.containsKey(persona)) {
+            s = clave + "Profesor inexistente\n";
+            aw.write(s);
+            return;
+        }
         while (it.hasNext()) {
             Integer key = it.next();
             if (asignaturas.get(key).getSiglas().contentEquals(asignatura)) {
@@ -300,13 +313,8 @@ public class Gestor {
                 return;
             }
         }
-        if (!personas.containsKey(persona)) {
-            s = clave + "Profesor inexistente\n";
-            aw.write(s);
-            return;
-        }
         if (!tipoGrupo.contentEquals("A") || !tipoGrupo.contentEquals("B")) {
-            s = clave + "Profesor inexistente\n";
+            s = clave + "Tipo de grupo incorrecto\n";
             aw.write(s);
             return;
         }
@@ -315,6 +323,22 @@ public class Gestor {
             aw.write(s);
             return;
         }
+
+        /* FALTAN GRUPO YA ASIGNADO Y HORAS ASIGNABLES SUOPERIOR AL MÁXIMO
+
+        if () {
+            s = clave + "Grupo ya asignado\n";
+            aw.write(s);
+            return;
+        }
+        if () {
+            s = clave + "Horas asignables superior al máximo\n";
+            aw.write(s);
+            return;
+        }
+
+        */
+
         if (GeneraSolape(tipoGrupo, idGrupo)) {
             s = clave + "Se genera solape\n";
             aw.write(s);

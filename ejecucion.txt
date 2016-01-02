@@ -1,0 +1,18 @@
+*******************************************************************************
+*      AsignaCargaDocente persona asignatura tipoGrupo grupo
+*******************************************************************************
+*      Avisos:
+* 	   Tipo de grupo incorrecto
+* 	   Grupo inexistente
+* 	   Grupo ya asignado
+* 	   Horas asignables superior al máximo
+* 	   OK
+*          Se genera solape
+*
+AsignaCargaDocente 34567210G RO C 2
+AsignaCargaDocente 34567210G RO A 3
+AsignaCargaDocente 34567210G P-II A 1
+AsignaCargaDocente 37834521G CAL-II A 3
+AsignaCargaDocente 34567210G  P-II A 2
+AsignaCargaDocente 33218765A CD A 1
+*
