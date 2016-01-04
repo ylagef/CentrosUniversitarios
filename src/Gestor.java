@@ -458,28 +458,50 @@ public class Gestor {
     }
 
     public void Evalua(String asignatura, String cursoAcademico, String fichero) throws IOException {
-        File evaluacion = new File(fichero);
-        FileReader fr = new FileReader(evaluacion);
-        BufferedReader br = new BufferedReader(fr);
-
-        String linea, alumno, s;
+        String s, stringId = "", clave = "EVALUA -- ", linea, alumno = null;
+        int idAsignatura = 0, numeroLinea = 0;
         float notaA = 0, notaB = 0;
-        while ((linea = br.readLine()) != null) {
 
-            StringTokenizer st = new StringTokenizer(linea);
+        Iterator<Integer> it = asignaturas.keySet().iterator();
 
-            while (st.hasMoreTokens()) {
-                alumno = st.nextToken().replaceAll(" ", "");
-                notaA = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
-                notaB = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
+        while (it.hasNext()) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getSiglas().contains(asignatura)) {
+                idAsignatura = Integer.parseInt(asignaturas.get(key).getId().replaceAll(" ", ""));
+                stringId = asignaturas.get(key).getId().replaceAll(" ", "");
+                break;
             }
-
-            if ((notaA + notaB) >= 5) {
-
+            if (!it.hasNext()) {
+                s = clave + "Asignatura inexistente\n";
+                aw.write(s);
+                return;
             }
-
         }
 
+        try {
+            File evaluacion = new File(fichero);
+            FileReader fr = new FileReader(evaluacion);
+            BufferedReader br = new BufferedReader(fr);
+
+            while ((linea = br.readLine()) != null) {
+                numeroLinea++;
+
+                StringTokenizer st = new StringTokenizer(linea);
+
+                while (st.hasMoreTokens()) {
+                    alumno = st.nextToken().replaceAll(" ", "");
+                    notaA = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
+                    notaB = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
+                }
+
+                GestionaFicheroEval(alumno, notaA, notaB, numeroLinea, stringId);
+
+            }
+        } catch (FileNotFoundException e) {
+            s = clave + "Fichero de notas inexistente\n";
+            aw.write(s);
+            return;
+        }
 
     }
 
@@ -665,6 +687,29 @@ public class Gestor {
         }*/
         return false;
     } /////////////////////////////////////////////// FALTA
+
+    public void GestionaFicheroEval(String alumno, float notaA, float notaB, int numeroLinea, String stringId) throws IOException {
+        String s, clave = "EVALUA -- ";
+        if (!personas.containsKey(alumno)) {
+            s = clave + "Error en la línea: " + numeroLinea + ": Alumno inexistente: " + alumno + "\n";
+            aw.write(s);
+            return;
+        }
+        if (!((Alumno) personas.get(alumno)).getDocenciaRecibida().contains(stringId)) {
+            s = clave + "Error en la línea: " + numeroLinea + ": Alumno no matriculado: " + alumno + "\n";
+            aw.write(s);
+            return;
+        }
+        if (notaA < 0 || notaA > 5 || notaB < 0 || notaB > 5) {
+            s = clave + "Error en la línea: " + numeroLinea + ": Nota grupo A/B incorrecta\n";
+            aw.write(s);
+            return;
+        }
+
+        s = clave + "OK\n";
+        aw.write(s);
+        return;
+    }
 
     //OTROS
 
