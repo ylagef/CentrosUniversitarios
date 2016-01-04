@@ -1,18 +1,19 @@
-*******************************************************************************
-*      AsignaCargaDocente persona asignatura tipoGrupo grupo
-*******************************************************************************
-*      Avisos:
-* 	   Tipo de grupo incorrecto
-* 	   Grupo inexistente
-* 	   Grupo ya asignado
-* 	   Horas asignables superior al máximo
-* 	   OK
-*          Se genera solape
+********************************************************************************************
+*       Evalua asignatura cursoAcademico fichero
+********************************************************************************************
+*	Numero de argumentos incorrecto
+*	Asignatura inexistente
+*	Fichero	de notas inexistente
+*       Asignatura ya evaluada en ese curso académico
+*       **Por linea de notas:          notas.txt
+* 	Alumno inexistente: <dni>      56431122R 3 4
+*	Alumno no matriculado: <dni>   56432001Y 4 3
+*	Nota grupo A/B incorrecta      56534219N 4 8
+*               OK-1                   56534219N 4 2
 *
-AsignaCargaDocente 34567210G RO C 2
-AsignaCargaDocente 34567210G RO A 3
-AsignaCargaDocente 34567210G P-II A 1
-AsignaCargaDocente 37834521G CAL-II A 3
-AsignaCargaDocente 34567210G  P-II A 2
-AsignaCargaDocente 33218765A CD A 1
+Evalua PROG
+Evalua PROG 15/16 notas.txt
+Evalua CAL-II 15/16 not.txt
+Evalua CAL-II 14/15 notas.txt
+Evalua CAL-II 15/16 notas.txt
 *

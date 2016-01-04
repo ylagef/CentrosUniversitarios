@@ -96,8 +96,17 @@ public class Gestor {
                                 Matricula(alumno, siglasAsignatura);
                                 break;
                             case "AsignaGrupo": //AsignaGrupo alumno asignatura tipoGrupo grupo
+                                String DNIalumno = st.nextToken();
+                                String IDasignatura = st.nextToken();
+                                String tGrupo = st.nextToken();
+                                String iGrupo = st.nextToken();
+                                AsignaGrupo(DNIalumno, IDasignatura, tGrupo, iGrupo);
                                 break;
                             case "Evalua": //Evalua asignatura cursoAcademico fichero
+                                String asignaturaID = st.nextToken();
+                                String cursoAcademico = st.nextToken();
+                                String fichero = st.nextToken();
+                                Evalua(asignaturaID, cursoAcademico, fichero);
                                 break;
                             case "Expediente": //Expediente alumno salida
                                 break;
@@ -304,16 +313,17 @@ public class Gestor {
         }
         while (it.hasNext()) {
             Integer key = it.next();
-            if (asignaturas.get(key).getSiglas().contentEquals(asignatura)) {
-                idAsignatura = Integer.parseInt(asignaturas.get(key).getId());
+            if (asignaturas.get(key).getSiglas().contains(asignatura)) {
+                idAsignatura = Integer.parseInt(asignaturas.get(key).getId().replaceAll(" ", ""));
                 break;
-            } else {
+            }
+            if (!it.hasNext()) {
                 s = clave + "Asignatura inexistente\n";
                 aw.write(s);
                 return;
             }
         }
-        if (!tipoGrupo.contentEquals("A") || !tipoGrupo.contentEquals("B")) {
+        if (!(tipoGrupo.contains("A") || tipoGrupo.contains("B"))) {
             s = clave + "Tipo de grupo incorrecto\n";
             aw.write(s);
             return;
@@ -324,26 +334,26 @@ public class Gestor {
             return;
         }
 
-        /* FALTAN GRUPO YA ASIGNADO Y HORAS ASIGNABLES SUOPERIOR AL MÁXIMO
-
-        if () {
+        /* FALTAN GRUPO YA ASIGNADO Y HORAS ASIGNABLES SUOPERIOR AL MÁXIMO */
+/*
+        if (GrupoYaAsignado(asignatura,tipoGrupo,idGrupo)) {
             s = clave + "Grupo ya asignado\n";
             aw.write(s);
             return;
         }
-        if () {
+
+        if (ComprobarHorasAsignables(persona)) {
             s = clave + "Horas asignables superior al máximo\n";
             aw.write(s);
             return;
         }
-
-        */
 
         if (GeneraSolape(tipoGrupo, idGrupo)) {
             s = clave + "Se genera solape\n";
             aw.write(s);
             return;
         }
+        */
 
         ((Profesor) personas.get(persona)).setDocenciaImpartida(idAsignatura + " " + tipoGrupo + " " + idGrupo);
 
@@ -362,11 +372,12 @@ public class Gestor {
         }
         while (it.hasNext()) {
             Integer key = it.next();
-            if (asignaturas.get(key).getSiglas().contentEquals(asignatura)) {
-                idAsignatura = Integer.parseInt(asignaturas.get(key).getId());
-                stringId = asignaturas.get(key).getId();
+            if (asignaturas.get(key).getSiglas().contains(asignatura)) {
+                idAsignatura = Integer.parseInt(asignaturas.get(key).getId().replaceAll(" ", ""));
+                stringId = asignaturas.get(key).getId().replaceAll(" ", "");
                 break;
-            } else {
+            }
+            if (!it.hasNext()) {
                 s = clave + "Asignatura inexistente\n";
                 aw.write(s);
                 return;
@@ -385,13 +396,90 @@ public class Gestor {
 
         ((Alumno) personas.get(alumno)).setDocenciaRecibida(stringId);
 
+        s = clave + "OK\n";
+        aw.write(s);
+
     }
 
-    public void AsignaGrupo(String alumno, String asignatura, String tipoGrupo, String grupo) {
+    public void AsignaGrupo(String alumno, String asignatura, String tipoGrupo, String idGrupo) throws IOException {
+        String s, stringId = "", clave = "AGRUPO -- ";
+        int idAsignatura = 0;
 
+        Iterator<Integer> it = asignaturas.keySet().iterator();
+        if (!personas.containsKey(alumno)) {
+            s = clave + "Alumno inexistente\n";
+            aw.write(s);
+            return;
+        }
+        while (it.hasNext()) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getSiglas().contains(asignatura)) {
+                idAsignatura = Integer.parseInt(asignaturas.get(key).getId().replaceAll(" ", ""));
+                stringId = asignaturas.get(key).getId().replaceAll(" ", "");
+                break;
+            }
+            if (!it.hasNext()) {
+                s = clave + "Asignatura inexistente\n";
+                aw.write(s);
+                return;
+            }
+        }
+        if (!((Alumno) personas.get(alumno)).getDocenciaRecibida().contains(stringId)) {
+            s = clave + "Alumno no matriculado\n";
+            aw.write(s);
+            return;
+        }
+        if (!(tipoGrupo.contains("A") || tipoGrupo.contains("B"))) {
+            s = clave + "Tipo de grupo incorrecto\n";
+            aw.write(s);
+            return;
+        }
+        if (!GrupoDeAsignatura(asignatura, tipoGrupo, idGrupo)) {
+            s = clave + "Grupo inexistente\n";
+            aw.write(s);
+            return;
+        }
+
+        /*
+        if (GeneraSolape(tipoGrupo, idGrupo)) {
+            s = clave + "Se genera solape\n";
+            aw.write(s);
+            return;
+        }
+        */
+
+        String nuevo = "; " + asignatura + " " + tipoGrupo + " " + idGrupo;
+        String viejo = ((Alumno) personas.get(alumno)).getDocenciaRecibida();
+
+        ((Alumno) personas.get(alumno)).setDocenciaRecibida(viejo + nuevo);
+
+        s = clave + "OK\n";
+        aw.write(s);
     }
 
-    public void Evalua(String asignatura, String cursoAcademico, String fichero) {
+    public void Evalua(String asignatura, String cursoAcademico, String fichero) throws IOException {
+        File evaluacion = new File(fichero);
+        FileReader fr = new FileReader(evaluacion);
+        BufferedReader br = new BufferedReader(fr);
+
+        String linea, alumno, s;
+        float notaA = 0, notaB = 0;
+        while ((linea = br.readLine()) != null) {
+
+            StringTokenizer st = new StringTokenizer(linea);
+
+            while (st.hasMoreTokens()) {
+                alumno = st.nextToken().replaceAll(" ", "");
+                notaA = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
+                notaB = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
+            }
+
+            if ((notaA + notaB) >= 5) {
+
+            }
+
+        }
+
 
     }
 
@@ -501,21 +589,68 @@ public class Gestor {
     }
 
     public boolean GrupoDeAsignatura(String asignatura, String tipoGrupo, String idGrupo) {
+        int idAsignatura = 0;
+        Iterator<Integer> it = asignaturas.keySet().iterator();
 
-        int idAsignatura = Integer.parseInt(asignaturas.get(asignatura).getId());
+        while (it.hasNext()) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getSiglas().replaceAll(" ", "").contentEquals(asignatura.replaceAll(" ", ""))) {
+                idAsignatura = Integer.parseInt(asignaturas.get(key).getId());
+                break;
+            }
+        }
 
         if (tipoGrupo.contentEquals("A")) {
             if (asignaturas.get(idAsignatura).getGruposA().contains(idGrupo)) {
                 return true;
             }
-        } else if (tipoGrupo.contentEquals("B")) {
+        }
+
+        if (tipoGrupo.contentEquals("B")) {
             if (asignaturas.get(idAsignatura).getGruposB().contains(idGrupo)) {
                 return true;
             }
         }
+
         return false;
     }
 
+    public boolean GrupoYaAsignado(String asignatura, String tipoGrupo, String idGrupo) {
+        int idAsignatura = 0;
+        Iterator<Integer> it = asignaturas.keySet().iterator();
+
+        while (it.hasNext()) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getSiglas().replaceAll(" ", "").contentEquals(asignatura.replaceAll(" ", ""))) {
+                idAsignatura = Integer.parseInt(asignaturas.get(key).getId());
+                break;
+            }
+        }
+
+        if (tipoGrupo.contentEquals("A")) {
+            if (asignaturas.get(idAsignatura).getGruposA().contains(idGrupo)) {
+                return true;
+            }
+        }
+
+        if (tipoGrupo.contentEquals("B")) {
+            if (asignaturas.get(idAsignatura).getGruposB().contains(idGrupo)) {
+                return true;
+            }
+        }
+
+        return false;
+    } ///////////////////////////////////////// FALTA
+
+    /*
+        public boolean ComprobarHorasAsignables(String persona) {
+            String horas = ((Profesor) personas.get(persona)).getHorasAsignables();
+            if () {
+                return true;
+            }
+            return false;
+        } ///////////////////////////////////// FALTA
+    */
     //----------------------------- FALTA COMPROBAR SOLAPE -----------------------------
     public boolean GeneraSolape(String tipoGrupo, String idGrupo) {
         /*
@@ -529,7 +664,7 @@ public class Gestor {
             }
         }*/
         return false;
-    }
+    } /////////////////////////////////////////////// FALTA
 
     //OTROS
 
