@@ -691,17 +691,17 @@ public class Gestor {
     public void GestionaFicheroEval(String alumno, float notaA, float notaB, int numeroLinea, String stringId) throws IOException {
         String s, clave = "EVALUA -- ";
         if (!personas.containsKey(alumno)) {
-            s = clave + "Error en la línea: " + numeroLinea + ": Alumno inexistente: " + alumno + "\n";
+            s = clave + "Error en línea " + numeroLinea + ": Alumno inexistente: " + alumno + "\n";
             aw.write(s);
             return;
         }
         if (!((Alumno) personas.get(alumno)).getDocenciaRecibida().contains(stringId)) {
-            s = clave + "Error en la línea: " + numeroLinea + ": Alumno no matriculado: " + alumno + "\n";
+            s = clave + "Error en línea " + numeroLinea + ": Alumno no matriculado: " + alumno + "\n";
             aw.write(s);
             return;
         }
         if (notaA < 0 || notaA > 5 || notaB < 0 || notaB > 5) {
-            s = clave + "Error en la línea: " + numeroLinea + ": Nota grupo A/B incorrecta\n";
+            s = clave + "Error en línea " + numeroLinea + ": Nota grupo A/B incorrecta\n";
             aw.write(s);
             return;
         }
