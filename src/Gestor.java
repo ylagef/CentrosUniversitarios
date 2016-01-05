@@ -28,7 +28,7 @@ public class Gestor {
     TreeMap<Integer, Asignatura> asignaturas = new TreeMap<>();
 
     /**
-     * Método Ejecucución.
+     * Metodo Ejecucucion.
      * Es llamado desde el Main y lo que hace es:
      * -Crear las asignaturas y personas recibidas de los ficheros para poder utilizarlas en el programa.
      * -Leer el fichero ejecucion para seleccionar lo que debe hacer en cada caso.
@@ -147,16 +147,16 @@ public class Gestor {
         aw.close();
     }
 
-    //MÉTODOS PARA CREAR LAS PERSONAS Y ASIGNATURAS
+    //MeTODOS PARA CREAR LAS PERSONAS Y ASIGNATURAS
 
     /**
-     * Método que lee el fichero personas.txt y crea las personas, introduciendolas en el TreeMap con su DNI como key.
+     * Metodo que lee el fichero personas.txt y crea las personas, introduciendolas en el TreeMap con su DNI como key.
      *
      * @throws IOException
      */
     public void CrearPersonas() throws IOException {
 
-        //DECLARACIÓN DE LAS VARIABLES NECESARIAS PARA CREAR UNA PERSONA
+        //DECLARACIoN DE LAS VARIABLES NECESARIAS PARA CREAR UNA PERSONA
         String id, horasAsignables, nombre, apellidos, departamento, categoria, fecha1, fecha2, docenciaImpartida, docenciaRecibida, asignaturasSuperadas;
 
         //SE LEE EL FICHERO PERSONAS.TXT PARA PODER ACCEDER A LOS DATOS
@@ -199,13 +199,13 @@ public class Gestor {
     }
 
     /**
-     * Método que lee el fichero asignaturas.txt, creando las asignaturas e introduciendolas en el TreeMap con su ID como key.
+     * Metodo que lee el fichero asignaturas.txt, creando las asignaturas e introduciendolas en el TreeMap con su ID como key.
      *
      * @throws IOException
      */
     public void CrearAsignaturas() throws IOException {
 
-        //DECLARACIÓN DE LAS VARIABLES NECESARIAS PARA CREAR UNA PERSONA
+        //DECLARACIoN DE LAS VARIABLES NECESARIAS PARA CREAR UNA PERSONA
         String id, nombre, siglas, curso, coordinador, prerrequisitos, gruposA, gruposB;
 
         //SE LEE EL FICHERO PERSONAS.TXT PARA PODER ACCEDER A LOS DATOS
@@ -233,10 +233,10 @@ public class Gestor {
         }
     }
 
-    //MÉTODOS PARA LAS FUNCIONALIDADES
+    //METODOS PARA LAS FUNCIONALIDADES
 
     /**
-     * Método para introducir una persona nueva.
+     * Metodo para introducir una persona nueva.
      * Comprueba que no haya errores, y si los hay crea el aviso.
      * En caso de que no haya errores crea la persona y la añade al TreeMap y al fichero personas.txt.
      *
@@ -292,7 +292,7 @@ public class Gestor {
     }
 
     /**
-     * Métdodo que comprueba que no haya los errores pertinentes y en caso de que este correcto asigna el coordinador a la asignatura.
+     * Metdodo que comprueba que no haya los errores pertinentes y en caso de que este correcto asigna el coordinador a la asignatura.
      *
      * @param persona    Profesor que se asignara como coordinador.
      * @param asignatura Asignatura de la que se quiere que sea coordinador.
@@ -340,8 +340,8 @@ public class Gestor {
     /**
      * Metodo para asignar un profesor a un grupo de una asignatura.
      *
-     * @param persona    Profesor que se asignará.
-     * @param asignatura Asignatura a la que se asignará.
+     * @param persona    Profesor que se asignara.
+     * @param asignatura Asignatura a la que se asignara.
      * @param tipoGrupo  Tipo de grupo (A/B).
      * @param idGrupo    Id del grupo.
      * @throws IOException
@@ -502,7 +502,7 @@ public class Gestor {
     }
 
     /**
-     * Metodo que permite introducir las notas de una asignatura y modificar de modo consecuente toda la información en el sistema
+     * Metodo que permite introducir las notas de una asignatura y modificar de modo consecuente toda la informacion en el sistema
      *
      * @param asignatura     Asignatura.
      * @param cursoAcademico Curso del que son las notas.
@@ -553,7 +553,7 @@ public class Gestor {
                     while (supt.hasMoreTokens()) {
                         sup = supt.nextToken(";");
                         if (sup.contains(cursoAcademico)) {
-                            s = clave + "Asignatura ya evaluada este curso académico\n";
+                            s = clave + "Asignatura ya evaluada este curso academico\n";
                             aw.write(s);
                             return;
                         }
@@ -630,7 +630,7 @@ public class Gestor {
             return;
         }
         if (((Alumno) personas.get(alumno)).getAsignaturasSuperadas().replaceAll(" ", "") == "") {
-            s = clave + "Expediente vacío\n";
+            s = clave + "Expediente vacio\n";
             aw.write(s);
             return;
         }
@@ -694,7 +694,7 @@ public class Gestor {
         String docencia = ((Profesor) personas.get(profesor)).getDocenciaImpartida();
         StringTokenizer dt = new StringTokenizer(docencia);
         String idAsignatura, tipoGrupo, idGrupo, horario, dia = "", hora = "";
-        cw.write("Día; Hora; Asignatura; Tipo grupo; Id grupo \n");
+        cw.write("Dia; Hora; Asignatura; Tipo grupo; Id grupo \n");
 
         while (dt.hasMoreTokens()) {
             idAsignatura = dt.nextToken();
@@ -1175,17 +1175,17 @@ public class Gestor {
     public boolean GestionaFicheroEval(String alumno, float notaA, float notaB, int numeroLinea, String stringId) throws IOException {
         String s, clave = "EVALUA -- ";
         if (!personas.containsKey(alumno)) {
-            s = clave + "Error en línea " + numeroLinea + ": Alumno inexistente: " + alumno + "\n";
+            s = clave + "Error en linea " + numeroLinea + ": Alumno inexistente: " + alumno + "\n";
             aw.write(s);
             return false;
         }
         if (!((Alumno) personas.get(alumno)).getDocenciaRecibida().contains(stringId)) {
-            s = clave + "Error en línea " + numeroLinea + ": Alumno no matriculado: " + alumno + "\n";
+            s = clave + "Error en linea " + numeroLinea + ": Alumno no matriculado: " + alumno + "\n";
             aw.write(s);
             return false;
         }
         if (notaA < 0 || notaA > 5 || notaB < 0 || notaB > 5) {
-            s = clave + "Error en línea " + numeroLinea + ": Nota grupo A/B incorrecta\n";
+            s = clave + "Error en linea " + numeroLinea + ": Nota grupo A/B incorrecta\n";
             aw.write(s);
             return false;
         }

@@ -3,7 +3,7 @@ public class Asignatura {
     private String id, nombre, siglas, curso, coordinador, prerrequisitos, gruposA, gruposB;
 
     /**
-     * Método constructor de la clase Asignatura.
+     * Metodo constructor de la clase Asignatura.
      *
      * @param id             Identificador.
      * @param nombre         Nombre de la asignatura.
@@ -175,7 +175,7 @@ public class Asignatura {
     }
 
     /**
-     * Método toString para escribir la asignatura en el fichero.
+     * Metodo toString para escribir la asignatura en el fichero.
      *
      * @return Cadena de la asignatura.
      */

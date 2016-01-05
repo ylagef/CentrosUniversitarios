@@ -7,7 +7,7 @@ public class Alumno extends Persona {
     //CONSTRUCTOR DE ALUMNO
 
     /**
-     * Método constructor de la clase Alumno.
+     * Metodo constructor de la clase Alumno.
      *
      * @param perfil               Alumno.
      * @param nombre               Nombre del alumno.
@@ -16,7 +16,7 @@ public class Alumno extends Persona {
      * @param fecha1               Fecha de nacimiento.
      * @param fecha2               Fecha de ingreso en el Centro.
      * @param asignaturasSuperadas Asignaturas ya superadas por el Alumno.
-     * @param docenciaRecibida     Asignaturas en las que está matriculado.
+     * @param docenciaRecibida     Asignaturas en las que esta matriculado.
      */
     public Alumno(String perfil, String nombre, String apellidos, String dni, String fecha1,
                   String fecha2, String asignaturasSuperadas, String docenciaRecibida) {
@@ -67,7 +67,7 @@ public class Alumno extends Persona {
     /**
      * Getter de Alumno.
      *
-     * @return Asignaturas en las que está matriculado el alumno.
+     * @return Asignaturas en las que esta matriculado el alumno.
      */
     public String getDocenciaRecibida() {
         return docenciaRecibida;
@@ -76,7 +76,7 @@ public class Alumno extends Persona {
     /**
      * Setter de Alumno.
      *
-     * @param docenciaRecibida Asignaturas en las que está matriculado.
+     * @param docenciaRecibida Asignaturas en las que esta matriculado.
      */
     public void setDocenciaRecibida(String docenciaRecibida) {
         this.docenciaRecibida = docenciaRecibida;
