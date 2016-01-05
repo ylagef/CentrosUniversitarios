@@ -1,8 +1,8 @@
 public class Alumno extends Persona {
 
     private String fecha2; //FECHA DE INGRESO EN EL CENTRO (DD/MM/AAAA)
-    private String asignaturasSuperadas;
-    private String docenciaRecibida;
+    private String asignaturasSuperadas; //ASIGNATURAS SUPERADAS POR EL ALUMNO
+    private String docenciaRecibida; //DOCENCIA RECIBIDA POR EL ALUMNO
 
     //CONSTRUCTOR DE ALUMNO
     public Alumno(String perfil, String nombre, String apellidos, String dni, String fecha1,
@@ -40,12 +40,10 @@ public class Alumno extends Persona {
 
     //TOSTRING DE ALUMNO
 
-
     @Override
     public String toString() {
         return "Alumno " + super.toString() + ", Fecha de ingreso: " + fecha2 + ", Asignaturas superadas: " + asignaturasSuperadas + ", Docencia recibida: " + docenciaRecibida + ".";
     }
-
 
     public String toStringOUT() {
         return super.toStringOUT() + fecha2 + "\n" + asignaturasSuperadas + "\n" + docenciaRecibida;

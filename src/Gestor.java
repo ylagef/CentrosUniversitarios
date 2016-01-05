@@ -7,6 +7,7 @@ import java.util.*;
 public class Gestor {
 
     //FICHEROS NECESARIOS PARA EL PROGRAMA
+
     File ejecucion = new File("ejecucion.txt");
     File fpersonas = new File("personas.txt");
     File fasignaturas = new File("asignaturas.txt");
@@ -43,7 +44,7 @@ public class Gestor {
 
                 instruccion = st.nextToken();
 
-                if (instruccion.contentEquals("InsertaPersona") || instruccion.contentEquals("AsignaCoordinador") || instruccion.contentEquals("AsignaCargaDocente") || instruccion.contentEquals("Matricula") || instruccion.contentEquals("AsignaGrupo") || instruccion.contentEquals("Evalua") || instruccion.contentEquals("Expediente") || instruccion.contentEquals("ObtenerCalendarioClases")) {
+                if (instruccion.contentEquals("InsertaPersona") || instruccion.contentEquals("AsignaCoordinador") || instruccion.contentEquals("AsignaCargaDocente") || instruccion.contentEquals("Matricula") || instruccion.contentEquals("AsignaGrupo") || instruccion.contentEquals("Evalua") || instruccion.contentEquals("Expediente") || instruccion.contentEquals("ObtenerCalendarioClases") || instruccion.contentEquals("OrdenaAlumnosXNota")) {
                     try {
                         switch (instruccion) {
                             case "InsertaPersona":
@@ -113,6 +114,10 @@ public class Gestor {
                                 String fsalida = st.nextToken();
                                 ObtenerCalendario(profesID, fsalida);
                                 break;
+                            case "OrdenaAlumnosXNota": //OrdenaAlumnosXNota salida
+                                String salidaOrdenados = st.nextToken();
+                                OrdenaAlumnosXNota(salidaOrdenados);
+                                break;
                         }
                     } catch (NoSuchElementException e) {
                         s = "Numero de argumentos incorrecto\n";
@@ -128,6 +133,7 @@ public class Gestor {
                 }
             }
         }
+
         GestionaFicheros();
         aw.close();
     }
@@ -330,25 +336,21 @@ public class Gestor {
             aw.write(s);
             return;
         }
-
         if (GrupoYaAsignado(asignatura, tipoGrupo, idGrupo)) {
             s = clave + "Grupo ya asignado\n";
             aw.write(s);
             return;
         }
-
-        if (ComprobarHorasAsignables(persona)) {
+        if (ComprobarHorasAsignables(persona, asignatura, tipoGrupo, idGrupo)) {
             s = clave + "Horas asignables superior al máximo\n";
             aw.write(s);
             return;
         }
-/*
-        if (GeneraSolape(tipoGrupo, idGrupo)) {
+        if (GeneraSolape(persona, asignatura, tipoGrupo, idGrupo)) {
             s = clave + "Se genera solape\n";
             aw.write(s);
             return;
         }
-        */
 
         ((Profesor) personas.get(persona)).setDocenciaImpartida(idAsignatura + " " + tipoGrupo + " " + idGrupo);
 
@@ -434,14 +436,11 @@ public class Gestor {
             aw.write(s);
             return;
         }
-
-        /*
-        if (GeneraSolape(tipoGrupo, idGrupo)) {
+        if (GeneraSolape(alumno, stringId, tipoGrupo, idGrupo)) {
             s = clave + "Se genera solape\n";
             aw.write(s);
             return;
         }
-        */
 
         String nuevo = "; " + asignatura + " " + tipoGrupo + " " + idGrupo;
         String viejo = ((Alumno) personas.get(alumno)).getDocenciaRecibida();
@@ -683,7 +682,65 @@ public class Gestor {
         aw.write(s);
     }
 
-    //COMPROBACIONES.
+    public void OrdenaAlumnosXNota(String salida) throws IOException {
+        String s, clave = "OAXNOTA -- ";
+        float notaMedia;
+        String nombre, apellidos, dni;
+
+        File ordenados = new File(salida);
+        BufferedWriter ow;
+        ow = new BufferedWriter(new FileWriter(ordenados));
+
+        Iterator<String> it = personas.keySet().iterator();
+        TreeMap<Float, String> alumnos = new TreeMap<>();
+        while (it.hasNext()) {
+            String key = it.next();
+            if (personas.get(key) instanceof Alumno) {
+                nombre = personas.get(key).getNombre();
+                apellidos = personas.get(key).getApellidos();
+                dni = personas.get(key).getDni();
+                notaMedia = NotaMedia(((Alumno) personas.get(key)).getDni());
+                String linea = nombre + " " + apellidos + " " + dni + " " + notaMedia;
+
+                alumnos.put(notaMedia, linea);
+            }
+        }
+
+        Iterator<Float> exp = alumnos.descendingKeySet().iterator();
+        while (exp.hasNext()) {
+            Float key = exp.next();
+            ow.write(alumnos.get(key) + "\n");
+        }
+        ow.close();
+
+        s = clave + "OK\n";
+        aw.write(s);
+    }
+
+    public float NotaMedia(String alumno) {
+        float sumaNotas = 0, cantidadNotas = 0, notaMedia = 0;
+        String nota;
+        String superadas = ((Alumno) personas.get(alumno)).getAsignaturasSuperadas();
+        if (superadas.contentEquals("")) {
+            notaMedia = 0;
+            return notaMedia;
+        }
+        StringTokenizer st = new StringTokenizer(superadas);
+
+        while (st.hasMoreTokens()) {
+            st.nextToken();
+            st.nextToken();
+            nota = st.nextToken();
+            sumaNotas = sumaNotas + Float.parseFloat(nota.replaceAll(";", ""));
+            cantidadNotas++;
+        }
+
+        notaMedia = sumaNotas / cantidadNotas;
+
+        return notaMedia;
+    }
+
+    //COMPROBACIONES Y OTROS.
 
     public boolean CompruebaFecha(String f1, String f2) {
         Date fecha1, fecha2, fechaInicial, fechaFinal;
@@ -839,7 +896,7 @@ public class Gestor {
         return false;
     }
 
-    public boolean ComprobarHorasAsignables(String persona) {
+    public boolean ComprobarHorasAsignables(String persona, String idAsignatura, String tipoGrupo, String idGrupo) {
         int horas = Integer.parseInt(((Profesor) personas.get(persona)).getHorasAsignables());
         int horaInicio, horaFin, horasTotales = 0;
         String horario;
@@ -895,23 +952,58 @@ public class Gestor {
             return true;
         }
 
-    }
+    }                                       //REVISAR SI SOBRA TIEMPO
 
-    //----------------------------- FALTA COMPROBAR SOLAPE -----------------------------
+    public boolean GeneraSolape(String persona, String idAsignatura, String tipoGrupo, String idGrupo) {
+        int horas = Integer.parseInt(((Profesor) personas.get(persona)).getHorasAsignables());
+        int horaInicio, horaFin, horasTotales = 0;
+        String horario;
 
-    public boolean GeneraSolape(String tipoGrupo, String idGrupo) {
-        /*
-        Iterator<String> it = personas.keySet().iterator();
+        Iterator<Integer> it = asignaturas.keySet().iterator();
 
         while (it.hasNext()) {
-            String key = it.next();
-            if (personas.get(key) instanceof Profesor) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getId().equalsIgnoreCase(idAsignatura)) {
+                if (tipoGrupo.contains("A")) {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposA());
 
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            StringTokenizer sel = new StringTokenizer(horario);
 
+                            while (sel.hasMoreTokens()) {
+                                sel.nextToken();
+                                sel.nextToken();
+                                horaInicio = Integer.parseInt(sel.nextToken());
+                                horaFin = Integer.parseInt(sel.nextToken());
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposB());
+
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            StringTokenizer sel = new StringTokenizer(horario);
+
+                            while (sel.hasMoreTokens()) {
+                                sel.nextToken();
+                                sel.nextToken();
+                                horaInicio = Integer.parseInt(sel.nextToken());
+                                horaFin = Integer.parseInt(sel.nextToken());
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-        }*/
+        }
+
         return false;
-    } /////////////////////////////////////////////// FALTA
+    }                                                   //REVISAR SI SOBRA TIEMPO
 
     public boolean GestionaFicheroEval(String alumno, float notaA, float notaB, int numeroLinea, String stringId) throws IOException {
         String s, clave = "EVALUA -- ";
@@ -933,8 +1025,6 @@ public class Gestor {
 
         return true;
     }
-
-    //OTROS
 
     public void PonerBlanco(File fichero) {
         try {

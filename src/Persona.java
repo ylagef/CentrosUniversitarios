@@ -1,11 +1,12 @@
 public class Persona {
 
     private String perfil; //ALUMNO O PROFESOR
-    private String nombre, apellidos;
-    private String dni; //SER� EL ID DE LA PERSONA
+    private String nombre, apellidos; //NOMBRE Y APELLIDOS DE LA PERSONA
+    private String dni; //ID DE LA PERSONA
     private String fecha1; //FECHA DE NACIMIENTO DE LA PERSONA.
 
     //CONSTRUCTOR CLASE PERSONA
+
     public Persona(String perfil, String nombre, String apellidos, String dni, String fecha1) {
         super();
         this.perfil = perfil;
@@ -16,6 +17,7 @@ public class Persona {
     }
 
     //GETTERS Y SETTERS
+
     public String getPerfil() {
         return perfil;
     }
@@ -57,6 +59,7 @@ public class Persona {
     }
 
     //TOSTRING DE PERSONA
+
     @Override
     public String toString() {
         return "Nombre: " + nombre + ", Apellidos: " + apellidos + ", Dni: " + dni
@@ -73,6 +76,4 @@ public class Persona {
 
         return tipo + "\n" + dni + "\n" + nombre + "\n" + apellidos + "\n" + fecha1 + "\n";
     }
-
-
 }
