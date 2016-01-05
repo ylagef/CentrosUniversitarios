@@ -331,9 +331,7 @@ public class Gestor {
             return;
         }
 
-        /* FALTAN GRUPO YA ASIGNADO Y HORAS ASIGNABLES SUOPERIOR AL MÁXIMO */
-/*
-        if (GrupoYaAsignado(asignatura,tipoGrupo,idGrupo)) {
+        if (GrupoYaAsignado(asignatura, tipoGrupo, idGrupo)) {
             s = clave + "Grupo ya asignado\n";
             aw.write(s);
             return;
@@ -344,7 +342,7 @@ public class Gestor {
             aw.write(s);
             return;
         }
-
+/*
         if (GeneraSolape(tipoGrupo, idGrupo)) {
             s = clave + "Se genera solape\n";
             aw.write(s);
@@ -597,15 +595,92 @@ public class Gestor {
         notaMedia = sumaNotas / cantidadNotas;
         String aux = "Nota media del expediente: " + notaMedia;
         ew.write(aux);
+
         ew.close();
         s = clave + "OK\n";
         aw.write(s);
-        return;
-
     }
 
-    public void ObtenerCalendario(String profesor, String salida) {
+    public void ObtenerCalendario(String profesor, String salida) throws IOException {
+        String s, clave = "CALENP -- ";
+        File calendario = new File(salida);
+        PonerBlanco(calendario);
 
+        if (!personas.containsKey(profesor)) {
+            s = clave + "Profesor inexistente\n";
+            aw.write(s);
+            return;
+        }
+        if (((Profesor) personas.get(profesor)).getDocenciaImpartida().replaceAll(" ", "").contentEquals("")) {
+            s = clave + "Profesor sin asignaciones\n";
+            aw.write(s);
+            return;
+        }
+
+        BufferedWriter cw;
+        cw = new BufferedWriter(new FileWriter(calendario));
+
+        String docencia = ((Profesor) personas.get(profesor)).getDocenciaImpartida();
+        StringTokenizer dt = new StringTokenizer(docencia);
+        String idAsignatura, tipoGrupo, idGrupo, horario, dia = "", hora = "";
+        cw.write("Día; Hora; Asignatura; Tipo grupo; Id grupo \n");
+
+        while (dt.hasMoreTokens()) {
+            idAsignatura = dt.nextToken();
+            tipoGrupo = dt.nextToken();
+            idGrupo = dt.nextToken().replace(";", "");
+
+            Iterator<Integer> it = asignaturas.keySet().iterator();
+
+            while (it.hasNext()) {
+                Integer key = it.next();
+                if (asignaturas.get(key).getId().equalsIgnoreCase(idAsignatura)) {
+                    if (tipoGrupo.contains("A")) {
+                        StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposA());
+
+                        while (tok.hasMoreTokens()) {
+                            horario = tok.nextToken(";");
+                            if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                                StringTokenizer sel = new StringTokenizer(horario);
+
+                                while (sel.hasMoreTokens()) {
+                                    sel.nextToken();
+                                    dia = sel.nextToken();
+                                    hora = sel.nextToken();
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposB());
+
+                        while (tok.hasMoreTokens()) {
+                            horario = tok.nextToken(";");
+                            if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                                StringTokenizer sel = new StringTokenizer(horario);
+
+                                while (sel.hasMoreTokens()) {
+                                    sel.nextToken();
+                                    dia = sel.nextToken();
+                                    hora = sel.nextToken();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            cw.write(dia + "; ");
+            cw.write(hora + "; ");
+            cw.write(asignaturas.get(Integer.parseInt(idAsignatura)).getSiglas() + "; ");
+            cw.write(tipoGrupo + "; ");
+            cw.write(idGrupo + "\n");
+        }
+
+        cw.close();
+        s = clave + "OK\n";
+        aw.write(s);
     }
 
     //COMPROBACIONES.
@@ -732,43 +807,98 @@ public class Gestor {
         return false;
     }
 
-    public boolean GrupoYaAsignado(String asignatura, String tipoGrupo, String idGrupo) {
-        int idAsignatura = 0;
-        Iterator<Integer> it = asignaturas.keySet().iterator();
+    public boolean GrupoYaAsignado(String idAsignatura, String tipoGrupo, String idGrupo) {
 
+        Iterator<Integer> it = asignaturas.keySet().iterator();
+        String horario;
         while (it.hasNext()) {
             Integer key = it.next();
-            if (asignaturas.get(key).getSiglas().replaceAll(" ", "").contentEquals(asignatura.replaceAll(" ", ""))) {
-                idAsignatura = Integer.parseInt(asignaturas.get(key).getId());
-                break;
-            }
-        }
+            if (asignaturas.get(key).getId().equalsIgnoreCase(idAsignatura)) {
+                if (tipoGrupo.contains("A")) {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposA());
 
-        if (tipoGrupo.contentEquals("A")) {
-            if (asignaturas.get(idAsignatura).getGruposA().contains(idGrupo)) {
-                return true;
-            }
-        }
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            return true;
+                        }
+                    }
+                } else {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposB());
 
-        if (tipoGrupo.contentEquals("B")) {
-            if (asignaturas.get(idAsignatura).getGruposB().contains(idGrupo)) {
-                return true;
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            return true;
+                        }
+                    }
+                }
             }
         }
 
         return false;
-    } ///////////////////////////////////////// FALTA
+    }
 
-    /*
-        public boolean ComprobarHorasAsignables(String persona) {
-            String horas = ((Profesor) personas.get(persona)).getHorasAsignables();
-            if () {
-                return true;
+    public boolean ComprobarHorasAsignables(String persona) {
+        int horas = Integer.parseInt(((Profesor) personas.get(persona)).getHorasAsignables());
+        int horaInicio, horaFin, horasTotales = 0;
+        String horario;
+
+        Iterator<Integer> it = asignaturas.keySet().iterator();
+
+        while (it.hasNext()) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getId().equalsIgnoreCase(idAsignatura)) {
+                if (tipoGrupo.contains("A")) {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposA());
+
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            StringTokenizer sel = new StringTokenizer(horario);
+
+                            while (sel.hasMoreTokens()) {
+                                sel.nextToken();
+                                sel.nextToken();
+                                horaInicio = Integer.parseInt(sel.nextToken());
+                                horaFin = Integer.parseInt(sel.nextToken());
+                                horasTotales = horasTotales + (horaFin - horaInicio);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposB());
+
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            StringTokenizer sel = new StringTokenizer(horario);
+
+                            while (sel.hasMoreTokens()) {
+                                sel.nextToken();
+                                sel.nextToken();
+                                horaInicio = Integer.parseInt(sel.nextToken());
+                                horaFin = Integer.parseInt(sel.nextToken());
+                                horasTotales = horasTotales + (horaFin - horaInicio);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
+        }
+
+        if (horasTotales > horas) {
             return false;
-        } ///////////////////////////////////// FALTA
-    */
+        } else {
+            return true;
+        }
+
+    }
+
     //----------------------------- FALTA COMPROBAR SOLAPE -----------------------------
+
     public boolean GeneraSolape(String tipoGrupo, String idGrupo) {
         /*
         Iterator<String> it = personas.keySet().iterator();
