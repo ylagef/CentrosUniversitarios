@@ -47,7 +47,7 @@ P-II
 Redes de Ordenadores
 RO
 2
-
+34567210G
 9
 1 M 9 11; 2 X 9 11
 1 X 11 13; 2 X 16 18; 3 J 11 13; 4 J 16 18

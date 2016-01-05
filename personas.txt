@@ -6,7 +6,17 @@ Pérez Sáchez
 titular
 Ingeniería Telemática
 14
-
+11 A 1
+*
+profesor
+34567210G
+J Antonio
+Álvarez González
+10/02/1972
+titular
+Ingeniería Telemática
+20
+12 A 2
 *
 profesor
 37834521G
@@ -16,7 +26,7 @@ Casas Domínguez
 asociado
 Matemática Aplicada
 10
-8 A 1; 8 A 2; 8 B 1; 8 B 2; 8 B 3
+8 A 3
 *
 profesor
 45632109V
@@ -47,10 +57,19 @@ Alonso Domínguez
 11; 12 B 2
 *
 alumno
+56432001Y
+Cristian 
+Alonso Pérez
+15/10/1997
+02/09/2015
+
+
+*
+alumno
 56534219N
 María Luisa
 Castro Antón
 11/11/1997
 02/09/2015
 
-8 A 3
+10; P-I B 5

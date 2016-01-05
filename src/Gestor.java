@@ -7,6 +7,7 @@ import java.util.*;
 public class Gestor {
 
     //FICHEROS NECESARIOS PARA EL PROGRAMA
+
     File ejecucion = new File("ejecucion.txt");
     File fpersonas = new File("personas.txt");
     File fasignaturas = new File("asignaturas.txt");
@@ -26,6 +27,15 @@ public class Gestor {
     TreeMap<String, Persona> personas = new TreeMap<>();
     TreeMap<Integer, Asignatura> asignaturas = new TreeMap<>();
 
+    /**
+     * Método Ejecucución.
+     * Es llamado desde el Main y lo que hace es:
+     * -Crear las asignaturas y personas recibidas de los ficheros para poder utilizarlas en el programa.
+     * -Leer el fichero ejecucion para seleccionar lo que debe hacer en cada caso.
+     * -Gestionar los ficheros.
+     *
+     * @throws IOException
+     */
     public void Ejecucion() throws IOException {
         String linea, instruccion, s;
 
@@ -43,7 +53,7 @@ public class Gestor {
 
                 instruccion = st.nextToken();
 
-                if (instruccion.contentEquals("InsertaPersona") || instruccion.contentEquals("AsignaCoordinador") || instruccion.contentEquals("AsignaCargaDocente") || instruccion.contentEquals("Matricula") || instruccion.contentEquals("AsignaGrupo") || instruccion.contentEquals("Evalua") || instruccion.contentEquals("Expediente") || instruccion.contentEquals("ObtenerCalendarioClases")) {
+                if (instruccion.contentEquals("InsertaPersona") || instruccion.contentEquals("AsignaCoordinador") || instruccion.contentEquals("AsignaCargaDocente") || instruccion.contentEquals("Matricula") || instruccion.contentEquals("AsignaGrupo") || instruccion.contentEquals("Evalua") || instruccion.contentEquals("Expediente") || instruccion.contentEquals("ObtenerCalendarioClases") || instruccion.contentEquals("OrdenaAlumnosXNota")) {
                     try {
                         switch (instruccion) {
                             case "InsertaPersona":
@@ -113,6 +123,10 @@ public class Gestor {
                                 String fsalida = st.nextToken();
                                 ObtenerCalendario(profesID, fsalida);
                                 break;
+                            case "OrdenaAlumnosXNota": //OrdenaAlumnosXNota salida
+                                String salidaOrdenados = st.nextToken();
+                                OrdenaAlumnosXNota(salidaOrdenados);
+                                break;
                         }
                     } catch (NoSuchElementException e) {
                         s = "Numero de argumentos incorrecto\n";
@@ -128,12 +142,18 @@ public class Gestor {
                 }
             }
         }
+
         GestionaFicheros();
         aw.close();
     }
 
     //MÉTODOS PARA CREAR LAS PERSONAS Y ASIGNATURAS
 
+    /**
+     * Método que lee el fichero personas.txt y crea las personas, introduciendolas en el TreeMap con su DNI como key.
+     *
+     * @throws IOException
+     */
     public void CrearPersonas() throws IOException {
 
         //DECLARACIÓN DE LAS VARIABLES NECESARIAS PARA CREAR UNA PERSONA
@@ -145,7 +165,7 @@ public class Gestor {
 
         String linea;
 
-        while ((linea = br.readLine()) != null) { //MIENTRAS EXISTA OTRA LÍNEA
+        while ((linea = br.readLine()) != null) { //MIENTRAS EXISTA OTRA LINEA
 
             if (linea.contains("*")) {
                 linea = br.readLine();
@@ -178,6 +198,11 @@ public class Gestor {
         }
     }
 
+    /**
+     * Método que lee el fichero asignaturas.txt, creando las asignaturas e introduciendolas en el TreeMap con su ID como key.
+     *
+     * @throws IOException
+     */
     public void CrearAsignaturas() throws IOException {
 
         //DECLARACIÓN DE LAS VARIABLES NECESARIAS PARA CREAR UNA PERSONA
@@ -187,7 +212,7 @@ public class Gestor {
         FileReader fr = new FileReader(fasignaturas);
         BufferedReader br = new BufferedReader(fr);
 
-        while ((id = br.readLine()) != null) { //MIENTRAS EXISTA OTRA LÍNEA
+        while ((id = br.readLine()) != null) { //MIENTRAS EXISTA OTRA LINEA
 
             if (id.contains("*")) {
                 id = br.readLine();
@@ -210,6 +235,14 @@ public class Gestor {
 
     //MÉTODOS PARA LAS FUNCIONALIDADES
 
+    /**
+     * Método para introducir una persona nueva.
+     * Comprueba que no haya errores, y si los hay crea el aviso.
+     * En caso de que no haya errores crea la persona y la añade al TreeMap y al fichero personas.txt.
+     *
+     * @param p Persona a añadir.
+     * @throws IOException
+     */
     public void InsertaPersona(Persona p) throws IOException {
         String s, clave = "IP -- ";
         if (!p.getDni().matches("(\\d{8})([-]?)([A-Z]{1})")) {
@@ -258,6 +291,13 @@ public class Gestor {
 
     }
 
+    /**
+     * Métdodo que comprueba que no haya los errores pertinentes y en caso de que este correcto asigna el coordinador a la asignatura.
+     *
+     * @param persona    Profesor que se asignara como coordinador.
+     * @param asignatura Asignatura de la que se quiere que sea coordinador.
+     * @throws IOException
+     */
     public void AsignaCoordinador(String persona, String asignatura) throws IOException {
         String s, clave = "ACOORD -- ";
         int idAsignatura = 0;
@@ -297,6 +337,15 @@ public class Gestor {
         aw.write(s);
     }
 
+    /**
+     * Metodo para asignar un profesor a un grupo de una asignatura.
+     *
+     * @param persona    Profesor que se asignará.
+     * @param asignatura Asignatura a la que se asignará.
+     * @param tipoGrupo  Tipo de grupo (A/B).
+     * @param idGrupo    Id del grupo.
+     * @throws IOException
+     */
     public void AsignaCargaDocente(String persona, String asignatura, String tipoGrupo, String idGrupo) throws IOException {
         String s, clave = "ACDOC -- ";
         int idAsignatura = 0;
@@ -330,30 +379,29 @@ public class Gestor {
             aw.write(s);
             return;
         }
-
         if (GrupoYaAsignado(asignatura, tipoGrupo, idGrupo)) {
             s = clave + "Grupo ya asignado\n";
             aw.write(s);
             return;
         }
 
-        if (ComprobarHorasAsignables(persona)) {
-            s = clave + "Horas asignables superior al máximo\n";
-            aw.write(s);
-            return;
-        }
-/*
-        if (GeneraSolape(tipoGrupo, idGrupo)) {
+        if (GeneraSolape(persona, asignatura, tipoGrupo, idGrupo)) {
             s = clave + "Se genera solape\n";
             aw.write(s);
             return;
         }
-        */
 
         ((Profesor) personas.get(persona)).setDocenciaImpartida(idAsignatura + " " + tipoGrupo + " " + idGrupo);
 
     }
 
+    /**
+     * Metodo para enrolar un alumno en una asignatura.
+     *
+     * @param alumno     Alumno a matricular.
+     * @param asignatura Asignatura en la que se desea matricular.
+     * @throws IOException
+     */
     public void Matricula(String alumno, String asignatura) throws IOException {
         String s, stringId = "", clave = "MAT -- ";
         int idAsignatura = 0;
@@ -396,6 +444,15 @@ public class Gestor {
 
     }
 
+    /**
+     * Metodo para asignar un grupo de una asignatura a un alumno previamente matriculado en ella
+     *
+     * @param alumno     Alumno a asignar.
+     * @param asignatura Asignatura en la que se desea asignar.
+     * @param tipoGrupo  (A/B)
+     * @param idGrupo    Id del grupo.
+     * @throws IOException
+     */
     public void AsignaGrupo(String alumno, String asignatura, String tipoGrupo, String idGrupo) throws IOException {
         String s, stringId = "", clave = "AGRUPO -- ";
         int idAsignatura = 0;
@@ -435,14 +492,6 @@ public class Gestor {
             return;
         }
 
-        /*
-        if (GeneraSolape(tipoGrupo, idGrupo)) {
-            s = clave + "Se genera solape\n";
-            aw.write(s);
-            return;
-        }
-        */
-
         String nuevo = "; " + asignatura + " " + tipoGrupo + " " + idGrupo;
         String viejo = ((Alumno) personas.get(alumno)).getDocenciaRecibida();
 
@@ -452,6 +501,14 @@ public class Gestor {
         aw.write(s);
     }
 
+    /**
+     * Metodo que permite introducir las notas de una asignatura y modificar de modo consecuente toda la información en el sistema
+     *
+     * @param asignatura     Asignatura.
+     * @param cursoAcademico Curso del que son las notas.
+     * @param fichero        Nombre del fichero de entrada.
+     * @throws IOException
+     */
     public void Evalua(String asignatura, String cursoAcademico, String fichero) throws IOException {
         String s, stringId = "", clave = "EVALUA -- ", linea, alumno = null;
         int idAsignatura = 0, numeroLinea = 0;
@@ -555,6 +612,13 @@ public class Gestor {
         }
     }
 
+    /**
+     * Metodo que genera el expediente del alumno en el fichero con el nombre introducido como salida.
+     *
+     * @param alumno Alumno del que se desea el expediente.
+     * @param salida Nombre del fichero de salida.
+     * @throws IOException
+     */
     public void Expediente(String alumno, String salida) throws IOException {
         String s, clave = "EXP -- ";
 
@@ -601,6 +665,13 @@ public class Gestor {
         aw.write(s);
     }
 
+    /**
+     * Metodo que genera el horario semanal de docencia del profesor.
+     *
+     * @param profesor DNI del profesor.
+     * @param salida   Nombre del fichero de salida.
+     * @throws IOException
+     */
     public void ObtenerCalendario(String profesor, String salida) throws IOException {
         String s, clave = "CALENP -- ";
         File calendario = new File(salida);
@@ -683,8 +754,85 @@ public class Gestor {
         aw.write(s);
     }
 
-    //COMPROBACIONES.
+    /**
+     * Metodo que genera una salida a fichero de todos los alumnos ordenados por la nota del expediente, de mayor a menor.
+     *
+     * @param salida Nombre del fichero de salida.
+     * @throws IOException
+     */
+    public void OrdenaAlumnosXNota(String salida) throws IOException {
+        String s, clave = "OAXNOTA -- ";
+        float notaMedia;
+        String nombre, apellidos, dni;
 
+        File ordenados = new File(salida);
+        BufferedWriter ow;
+        ow = new BufferedWriter(new FileWriter(ordenados));
+
+        Iterator<String> it = personas.keySet().iterator();
+        TreeMap<Float, String> alumnos = new TreeMap<>();
+        while (it.hasNext()) {
+            String key = it.next();
+            if (personas.get(key) instanceof Alumno) {
+                nombre = personas.get(key).getNombre();
+                apellidos = personas.get(key).getApellidos();
+                dni = personas.get(key).getDni();
+                notaMedia = NotaMedia(((Alumno) personas.get(key)).getDni());
+                String linea = nombre + " " + apellidos + " " + dni + " " + notaMedia;
+
+                alumnos.put(notaMedia, linea);
+            }
+        }
+
+        Iterator<Float> exp = alumnos.descendingKeySet().iterator();
+        while (exp.hasNext()) {
+            Float key = exp.next();
+            ow.write(alumnos.get(key) + "\n");
+        }
+        ow.close();
+
+        s = clave + "OK\n";
+        aw.write(s);
+    }
+
+    //COMPROBACIONES Y OTROS.
+
+    /**
+     * Metodo que obtiene la nota media del expediente.
+     *
+     * @param alumno DNI del alumno.
+     * @return Nota media.
+     */
+    public float NotaMedia(String alumno) {
+        float sumaNotas = 0, cantidadNotas = 0, notaMedia = 0;
+        String nota;
+        String superadas = ((Alumno) personas.get(alumno)).getAsignaturasSuperadas();
+        if (superadas.contentEquals("")) {
+            notaMedia = 0;
+            return notaMedia;
+        }
+        StringTokenizer st = new StringTokenizer(superadas);
+
+        while (st.hasMoreTokens()) {
+            st.nextToken();
+            st.nextToken();
+            nota = st.nextToken();
+            sumaNotas = sumaNotas + Float.parseFloat(nota.replaceAll(";", ""));
+            cantidadNotas++;
+        }
+
+        notaMedia = sumaNotas / cantidadNotas;
+
+        return notaMedia;
+    }
+
+    /**
+     * Comprueba que las fechas sean validas.
+     *
+     * @param f1 Fecha 1.
+     * @param f2 Fecha 2.
+     * @return True / false.
+     */
     public boolean CompruebaFecha(String f1, String f2) {
         Date fecha1, fecha2, fechaInicial, fechaFinal;
         SimpleDateFormat formatoDelTexto = new SimpleDateFormat("dd/MM/yyyy");
@@ -706,6 +854,12 @@ public class Gestor {
 
     }
 
+    /**
+     * Comprueba que la fecha sea valida.
+     *
+     * @param f1 Fecha a comprobar.
+     * @return True / false.
+     */
     public boolean CompruebaFecha(String f1) {
         Date fecha1, fechaInicial, fechaFinal;
         SimpleDateFormat formatoDelTexto = new SimpleDateFormat("dd/MM/yyyy");
@@ -726,6 +880,13 @@ public class Gestor {
 
     }
 
+    /**
+     * Comprueba que la fecha de ingreso sea correcta.
+     *
+     * @param f1 Fecha nacimiento.
+     * @param f2 Fecha ingreso.
+     * @return True / false.
+     */
     public boolean CompruebaFechaIngreso(String f1, String f2) {
         Date fecha1, fecha2, fechaInicial, fechaFinal;
         SimpleDateFormat formatoDelTexto = new SimpleDateFormat("dd/MM/yyyy");
@@ -747,6 +908,12 @@ public class Gestor {
 
     }
 
+    /**
+     * Comprueba que el numero de horas asignables no sobrepase el maximo.
+     *
+     * @param p Profesor.
+     * @return True /false.
+     */
     public boolean CompruebaHorasAsignables(Profesor p) {
         if (p.getCategoria().contentEquals("titular")) {
             if (Integer.parseInt(p.getHorasAsignables()) < 0 || Integer.parseInt(p.getHorasAsignables()) > 20) {
@@ -760,6 +927,12 @@ public class Gestor {
         return true;
     }
 
+    /**
+     * Comprueba si existe la persona.
+     *
+     * @param p Persona.
+     * @return True / false.
+     */
     public boolean CompruebaExistencia(Persona p) {
         if (personas.containsKey(p.getDni())) {
             return true;
@@ -767,6 +940,12 @@ public class Gestor {
         return false;
     }
 
+    /**
+     * Metodo para saber el numero de asignaturas de las que un profesor es coordinador.
+     *
+     * @param profesor DNI del profesor.
+     * @return Numero de asignaturas.
+     */
     public int NumeroAsignaturasCoordinador(String profesor) {
         int contador = 0;
 
@@ -780,6 +959,14 @@ public class Gestor {
         return contador;
     }
 
+    /**
+     * Metodo para comprobar si el grupo de una asignatura existe.
+     *
+     * @param asignatura Asignatura (ID).
+     * @param tipoGrupo  (A/B).
+     * @param idGrupo    Identificador.
+     * @return True /false.
+     */
     public boolean GrupoDeAsignatura(String asignatura, String tipoGrupo, String idGrupo) {
         int idAsignatura = 0;
         Iterator<Integer> it = asignaturas.keySet().iterator();
@@ -807,6 +994,14 @@ public class Gestor {
         return false;
     }
 
+    /**
+     * Comprueba si el grupo ya esta asignado.
+     *
+     * @param idAsignatura Asignatura.
+     * @param tipoGrupo    (A/B).
+     * @param idGrupo      Identificador.
+     * @return True / false.
+     */
     public boolean GrupoYaAsignado(String idAsignatura, String tipoGrupo, String idGrupo) {
 
         Iterator<Integer> it = asignaturas.keySet().iterator();
@@ -839,7 +1034,16 @@ public class Gestor {
         return false;
     }
 
-    public boolean ComprobarHorasAsignables(String persona) {
+    /**
+     * Comprobar las horas asignables a un profesor.
+     *
+     * @param persona      Profesor.
+     * @param idAsignatura Identificador de la asignatura.
+     * @param tipoGrupo    (A/B).
+     * @param idGrupo      Identificador del grupo.
+     * @return True / false.
+     */
+    public boolean ComprobarHorasAsignables(String persona, String idAsignatura, String tipoGrupo, String idGrupo) {
         int horas = Integer.parseInt(((Profesor) personas.get(persona)).getHorasAsignables());
         int horaInicio, horaFin, horasTotales = 0;
         String horario;
@@ -897,22 +1101,77 @@ public class Gestor {
 
     }
 
-    //----------------------------- FALTA COMPROBAR SOLAPE -----------------------------
+    /**
+     * Comprueba si se genera solape.
+     *
+     * @param persona      Profesor.
+     * @param idAsignatura Identificador de la asignatura.
+     * @param tipoGrupo    (A/B)
+     * @param idGrupo      Identificador.
+     * @return True / false.
+     */
+    public boolean GeneraSolape(String persona, String idAsignatura, String tipoGrupo, String idGrupo) {
+        int horas = Integer.parseInt(((Profesor) personas.get(persona)).getHorasAsignables());
+        int horaInicio, horaFin, horasTotales = 0;
+        String horario;
 
-    public boolean GeneraSolape(String tipoGrupo, String idGrupo) {
-        /*
-        Iterator<String> it = personas.keySet().iterator();
+        Iterator<Integer> it = asignaturas.keySet().iterator();
 
         while (it.hasNext()) {
-            String key = it.next();
-            if (personas.get(key) instanceof Profesor) {
+            Integer key = it.next();
+            if (asignaturas.get(key).getId().equalsIgnoreCase(idAsignatura)) {
+                if (tipoGrupo.contains("A")) {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposA());
 
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            StringTokenizer sel = new StringTokenizer(horario);
 
+                            while (sel.hasMoreTokens()) {
+                                sel.nextToken();
+                                sel.nextToken();
+                                horaInicio = Integer.parseInt(sel.nextToken());
+                                horaFin = Integer.parseInt(sel.nextToken());
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    StringTokenizer tok = new StringTokenizer(asignaturas.get(key).getGruposB());
+
+                    while (tok.hasMoreTokens()) {
+                        horario = tok.nextToken(";");
+                        if (horario.replaceAll(" ", "").startsWith(idGrupo)) {
+                            StringTokenizer sel = new StringTokenizer(horario);
+
+                            while (sel.hasMoreTokens()) {
+                                sel.nextToken();
+                                sel.nextToken();
+                                horaInicio = Integer.parseInt(sel.nextToken());
+                                horaFin = Integer.parseInt(sel.nextToken());
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-        }*/
-        return false;
-    } /////////////////////////////////////////////// FALTA
+        }
 
+        return false;
+    }
+
+    /**
+     * Comprueba si existen errores en el fichero de evaluacion.
+     *
+     * @param alumno      Alumno. DNI.
+     * @param notaA       Nota grupo A.
+     * @param notaB       Nota grupo B.
+     * @param numeroLinea Numero de linea del fichero.
+     * @param stringId    Identificador de la asignatura (String).
+     * @return True / false.
+     * @throws IOException
+     */
     public boolean GestionaFicheroEval(String alumno, float notaA, float notaB, int numeroLinea, String stringId) throws IOException {
         String s, clave = "EVALUA -- ";
         if (!personas.containsKey(alumno)) {
@@ -934,8 +1193,11 @@ public class Gestor {
         return true;
     }
 
-    //OTROS
-
+    /**
+     * Pone en blanco el fichero.
+     *
+     * @param fichero Fichero a borrar.
+     */
     public void PonerBlanco(File fichero) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(fichero));
@@ -947,6 +1209,11 @@ public class Gestor {
         }
     }
 
+    /**
+     * Reescribe los ficheros.
+     *
+     * @throws IOException
+     */
     public void GestionaFicheros() throws IOException {
         PonerBlanco(fpersonas);
         PonerBlanco(fasignaturas);
