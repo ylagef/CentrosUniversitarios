@@ -27,14 +27,13 @@ public class Gestor {
     TreeMap<Integer, Asignatura> asignaturas = new TreeMap<>();
 
     public void Ejecucion() throws IOException {
+        String linea, instruccion, s;
 
         CrearPersonas();
         CrearAsignaturas();
 
         FileReader fr = new FileReader(ejecucion);
         BufferedReader br = new BufferedReader(fr);
-
-        String linea, instruccion, s;
 
         while ((linea = br.readLine()) != null) {
 
@@ -66,23 +65,19 @@ public class Gestor {
                                     horasAsignables = st.nextToken().replace(" ", "");
 
                                     Persona p = new Profesor(perfil, nombre, apellidos, id, fecha1, categoria, departamento, horasAsignables, docenciaImpartida);
-
                                     InsertaPersona(p);
                                 } else if (perfil.contentEquals("alumno")) {
                                     fecha2 = st.nextToken();
 
                                     Persona a = new Alumno(perfil, nombre, apellidos, id, fecha1, fecha2, asignaturasSuperadas, docenciaRecibida);
-
                                     InsertaPersona(a);
                                 }
                                 break;
-
                             case "AsignaCoordinador": //AsignaCoordinador persona asignatura
                                 String persona = st.nextToken();
                                 String asignatura = st.nextToken();
                                 AsignaCoordinador(persona, asignatura);
                                 break;
-
                             case "AsignaCargaDocente": //AsignaCargaDocente persona asignatura tipoGrupo grupo
                                 String profesor = st.nextToken();
                                 String siglasAsig = st.nextToken();
@@ -109,11 +104,16 @@ public class Gestor {
                                 Evalua(asignaturaID, cursoAcademico, fichero);
                                 break;
                             case "Expediente": //Expediente alumno salida
+                                String alumnID = st.nextToken();
+                                String salida = st.nextToken();
+                                Expediente(alumnID, salida);
                                 break;
                             case "ObtenerCalendarioClases": //ObtenerCalendarioClases profesor salida
+                                String profesID = st.nextToken();
+                                String fsalida = st.nextToken();
+                                ObtenerCalendario(profesID, fsalida);
                                 break;
                         }
-
                     } catch (NoSuchElementException e) {
                         s = "Numero de argumentos incorrecto\n";
                         aw.write(s);
@@ -126,13 +126,10 @@ public class Gestor {
                     aw.write(s);
                     break;
                 }
-
             }
-
         }
         GestionaFicheros();
         aw.close();
-
     }
 
     //MÉTODOS PARA CREAR LAS PERSONAS Y ASIGNATURAS
@@ -493,19 +490,117 @@ public class Gestor {
                     notaA = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
                     notaB = Integer.parseInt(st.nextToken().replaceAll(" ", ""));
                 }
+                if (personas.containsKey(alumno)) {
+                    String superadas = ((Alumno) personas.get(alumno)).getAsignaturasSuperadas();
+                    StringTokenizer supt = new StringTokenizer(superadas);
+                    String sup;
 
-                GestionaFicheroEval(alumno, notaA, notaB, numeroLinea, stringId);
+                    while (supt.hasMoreTokens()) {
+                        sup = supt.nextToken(";");
+                        if (sup.contains(cursoAcademico)) {
+                            s = clave + "Asignatura ya evaluada este curso académico\n";
+                            aw.write(s);
+                            return;
+                        }
+                    }
+                }
 
+                if (GestionaFicheroEval(alumno, notaA, notaB, numeroLinea, stringId)) {
+                    float notaTotal = notaA + notaB;
+
+                    if (notaTotal >= 5) {
+                        String anteriores = ((Alumno) personas.get(alumno)).getAsignaturasSuperadas();
+
+                        if (anteriores.replaceAll(" ", "") == "") {
+                            ((Alumno) personas.get(alumno)).setAsignaturasSuperadas(anteriores + "; " + stringId + " " + cursoAcademico + " " + notaTotal);
+                        } else {
+                            ((Alumno) personas.get(alumno)).setAsignaturasSuperadas(stringId + " " + cursoAcademico + " " + notaTotal);
+                        }
+
+                        String docenciaRecibida = ((Alumno) personas.get(alumno)).getDocenciaRecibida();
+                        StringTokenizer doct = new StringTokenizer(docenciaRecibida);
+                        String recibida, nueva = "";
+
+                        while (doct.hasMoreTokens()) {
+                            recibida = doct.nextToken(";");
+                            if (!recibida.contains(stringId)) {
+                                if (recibida.replaceAll(" ", "") == "") {
+                                    nueva = recibida + "; ";
+                                }
+                                nueva = recibida;
+                            }
+                        }
+                        ((Alumno) personas.get(alumno)).setDocenciaRecibida(nueva);
+                    } else if (notaTotal < 5) {
+                        String docenciaRecibida = ((Alumno) personas.get(alumno)).getDocenciaRecibida();
+                        StringTokenizer dt = new StringTokenizer(docenciaRecibida);
+                        String recibida, nueva = "";
+
+                        while (dt.hasMoreTokens()) {
+                            recibida = dt.nextToken(";");
+                            if (!recibida.contains(stringId)) {
+                                nueva = recibida + "; ";
+                            }
+                        }
+
+                        ((Alumno) personas.get(alumno)).setDocenciaRecibida(nueva);
+
+                    }
+                    s = clave + "OK\n";
+                    aw.write(s);
+                }
             }
         } catch (FileNotFoundException e) {
             s = clave + "Fichero de notas inexistente\n";
             aw.write(s);
             return;
         }
-
     }
 
-    public void Expediente(String alumno, String salida) {
+    public void Expediente(String alumno, String salida) throws IOException {
+        String s, clave = "EXP -- ";
+
+        Iterator<Integer> it = asignaturas.keySet().iterator();
+
+        if (!personas.containsKey(alumno)) {
+            s = clave + "Alumno inexistente\n";
+            aw.write(s);
+            return;
+        }
+        if (((Alumno) personas.get(alumno)).getAsignaturasSuperadas().replaceAll(" ", "") == "") {
+            s = clave + "Expediente vacío\n";
+            aw.write(s);
+            return;
+        }
+
+        File expediente = new File(salida);
+        BufferedWriter ew;
+        ew = new BufferedWriter(new FileWriter(expediente));
+
+        String cursoAcademico, idAsignatura, nota;
+        String superadas = ((Alumno) personas.get(alumno)).getAsignaturasSuperadas();
+        StringTokenizer st = new StringTokenizer(superadas);
+        String sup;
+        float sumaNotas = 0, cantidadNotas = 0, notaMedia = 0;
+        while (st.hasMoreTokens()) {
+            idAsignatura = st.nextToken();
+            cursoAcademico = st.nextToken();
+            nota = st.nextToken();
+
+            ew.write(asignaturas.get(Integer.parseInt(idAsignatura)).getCurso() + "; ");
+            ew.write(asignaturas.get(Integer.parseInt(idAsignatura)).getNombre() + "; ");
+            ew.write(nota + "; ");
+            sumaNotas = sumaNotas + Float.parseFloat(nota.replaceAll(";", ""));
+            cantidadNotas++;
+            ew.write(cursoAcademico + "\n");
+        }
+        notaMedia = sumaNotas / cantidadNotas;
+        String aux = "Nota media del expediente: " + notaMedia;
+        ew.write(aux);
+        ew.close();
+        s = clave + "OK\n";
+        aw.write(s);
+        return;
 
     }
 
@@ -688,27 +783,25 @@ public class Gestor {
         return false;
     } /////////////////////////////////////////////// FALTA
 
-    public void GestionaFicheroEval(String alumno, float notaA, float notaB, int numeroLinea, String stringId) throws IOException {
+    public boolean GestionaFicheroEval(String alumno, float notaA, float notaB, int numeroLinea, String stringId) throws IOException {
         String s, clave = "EVALUA -- ";
         if (!personas.containsKey(alumno)) {
             s = clave + "Error en línea " + numeroLinea + ": Alumno inexistente: " + alumno + "\n";
             aw.write(s);
-            return;
+            return false;
         }
         if (!((Alumno) personas.get(alumno)).getDocenciaRecibida().contains(stringId)) {
             s = clave + "Error en línea " + numeroLinea + ": Alumno no matriculado: " + alumno + "\n";
             aw.write(s);
-            return;
+            return false;
         }
         if (notaA < 0 || notaA > 5 || notaB < 0 || notaB > 5) {
             s = clave + "Error en línea " + numeroLinea + ": Nota grupo A/B incorrecta\n";
             aw.write(s);
-            return;
+            return false;
         }
 
-        s = clave + "OK\n";
-        aw.write(s);
-        return;
+        return true;
     }
 
     //OTROS

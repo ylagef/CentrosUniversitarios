@@ -6,6 +6,7 @@ public class Proyecto {
         // TODO Auto-generated method stub
         Gestor g = new Gestor();
         g.Ejecucion();
+        System.exit(-1);
     }
 
 }
